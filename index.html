@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EosGene Platform Framework</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: radial-gradient(ellipse at top, #667eea 0%, #764ba2 50%, #1a1a2e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .framework-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .framework-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: conic-gradient(from 45deg, transparent 0deg, rgba(102, 126, 234, 0.1) 90deg, transparent 180deg, rgba(118, 75, 162, 0.1) 270deg, transparent 360deg);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M30 0L30 60M0 30L60 30'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+            opacity: 0.3;
+        }
+        
+        .header h1 {
+            margin: 0 0 15px 0;
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            position: relative;
+            z-index: 3;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 400;
+            opacity: 0.9;
+            position: relative;
+            z-index: 3;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            height: 900px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .axis-labels {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .axis-horizontal {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 100px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+        
+        .axis-vertical {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 100px;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 0;
+        }
+        
+        .axis-label {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .axis-label:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+        }
+        
+        .quadrant {
+            padding: 50px 40px;
+            position: relative;
+            border: 3px solid rgba(255,255,255,0.1);
+            overflow-y: auto;
+            transition: all 0.5s ease;
+        }
+        
+        .quadrant::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        
+        .quadrant:hover::before {
+            opacity: 1;
+        }
+        
+        .quadrant:hover {
+            transform: scale(1.02);
+            z-index: 5;
+        }
+        
+        .q1 {
+            background: linear-gradient(135deg, #2d1b69 0%, #1a0e3d 50%, #0f051f 100%);
+            color: white;
+            border-top-left-radius: 20px;
+            border: 2px solid rgba(255, 107, 157, 0.3);
+        }
+        
+        .q2 {
+            background: linear-gradient(135deg, #b8860b 0%, #8b4513 50%, #4a2c17 100%);
+            color: white;
+            border-top-right-radius: 20px;
+            border: 2px solid rgba(254, 202, 87, 0.3);
+        }
+        
+        .q3 {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 50%, #0f172a 100%);
+            color: white;
+            border-bottom-left-radius: 20px;
+            border: 2px solid rgba(72, 219, 251, 0.3);
+        }
+        
+        .q4 {
+            background: linear-gradient(135deg, #064e3b 0%, #1f2937 50%, #111827 100%);
+            color: white;
+            border-bottom-right-radius: 20px;
+            border: 2px solid rgba(29, 209, 161, 0.3);
+        }
+        
+        .quadrant-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid rgba(255,255,255,0.3);
+        }
+        
+        .quadrant-number {
+            background: rgba(255,255,255,0.25);
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 25px;
+            border: 3px solid rgba(255,255,255,0.4);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .quadrant-title {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .application-category {
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .application-category:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .category-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            color: white;
+        }
+        
+        .applications-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .applications-list li {
+            background: rgba(255,255,255,0.1);
+            margin: 10px 0;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border-left: 5px solid rgba(255,255,255,0.4);
+            transition: all 0.3s ease;
+            font-size: 15px;
+            line-height: 1.4;
+            backdrop-filter: blur(5px);
+            color: white;
+        }
+        
+        .applications-list li:hover {
+            background: rgba(255,255,255,0.18);
+            transform: translateX(8px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            border-left-color: white;
+        }
+        
+        .highlight {
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        
+        .market-note {
+            font-size: 13px;
+            opacity: 0.8;
+            font-style: italic;
+            font-weight: 400;
+        }
+        
+        .vs-note {
+            font-size: 13px;
+            opacity: 0.9;
+            font-style: italic;
+            margin-top: 5px;
+            background: rgba(0,0,0,0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-left: 3px solid rgba(255,255,255,0.4);
+        }
+        
+        /* Floating particles animation */
+        .quadrant::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.2), transparent);
+            background-repeat: repeat;
+            background-size: 150px 150px;
+            animation: float 15s infinite linear;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+            100% { transform: translateY(0px) rotate(360deg); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .grid-container {
+                height: 800px;
+            }
+            .quadrant {
+                padding: 30px 25px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .framework-container {
+                margin: 10px;
+                border-radius: 20px;
+            }
+            .grid-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+                height: auto;
+            }
+            .axis-labels {
+                display: none;
+            }
+            .quadrant {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="framework-container">
+        <div class="header">
+            <h1>EosGene NanoSyringe™ Platform Framework</h1>
+            <p>Precision-Activated Therapeutic Delivery Across Disease Applications</p>
+        </div>
+        
+        <div class="grid-container">
+            <div class="axis-labels">
+                <div class="axis-horizontal">
+                    <div class="axis-label">Drug</div>
+                    <div class="axis-label">Gene</div>
+                </div>
+                <div class="axis-vertical">
+                    <div class="axis-label">Light</div>
+                    <div class="axis-label">X-ray</div>
+                </div>
+            </div>
+            
+            <!-- Quadrant 1: Light-Drug -->
+            <div class="quadrant q1">
+                <div class="quadrant-header">
+                    <div class="quadrant-number">01</div>
+                    <div class="quadrant-title">Light-Activated<br>Drug Delivery</div>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Ophthalmology</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Anti-VEGF Antibodies</span> - Bevacizumab, ranibizumab, aflibercept
+                            <div class="vs-note">vs Q2: Delivering pre-made antibodies vs producing them via gene therapy</div>
+                        </li>
+                        <li><span class="highlight">Corticosteroids</span> - Dexamethasone, triamcinolone</li>
+                        <li><span class="highlight">Antibiotics</span> - Vancomycin, ceftazidime for endophthalmitis</li>
+                        <li><span class="highlight">Neuroprotectants</span> - BDNF, CNTF proteins</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Dermatology</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Photosensitizers</span> - Verteporfin, aminolevulinic acid</li>
+                        <li><span class="highlight">Anti-inflammatory Drugs</span> - Methotrexate, biologics</li>
+                        <li><span class="highlight">Antimicrobials</span> - Targeted antibiotic delivery</li>
+                        <li><span class="highlight">Growth Factors</span> - EGF, PDGF for wound healing</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Pain Management</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Local Anesthetics</span> - Tetrodotoxin, bupivacaine</li>
+                        <li><span class="highlight">Targeted Analgesics</span> - Morphine, gabapentin</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Quadrant 2: Light-Gene -->
+            <div class="quadrant q2">
+                <div class="quadrant-header">
+                    <div class="quadrant-number">02</div>
+                    <div class="quadrant-title">Light-Activated<br>Gene Therapy</div>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Retinal Gene Therapy</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">VEGF Suppression</span> - CRISPR targeting VEGF gene, anti-VEGF producing genes
+                            <div class="vs-note">vs Q1: Making cells produce anti-VEGF vs delivering pre-made antibodies</div>
+                        </li>
+                        <li><span class="highlight">Stargardt Disease</span> - ABCA4 gene replacement therapy</li>
+                        <li><span class="highlight">Leber Congenital Amaurosis</span> - CEP290, RPE65 gene correction</li>
+                        <li><span class="highlight">Retinoblastoma</span> - CRISPR targeting SYK, MDM4 oncogenes <span class="market-note">(~400 cases/year)</span></li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Skin Genetic Disorders</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Epidermolysis Bullosa</span> - COL7A1 gene correction</li>
+                        <li><span class="highlight">Xeroderma Pigmentosum</span> - DNA repair gene delivery</li>
+                        <li><span class="highlight">Ichthyosis</span> - Filaggrin gene replacement</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Enhanced CAR-T</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">CRISPR-Enhanced CAR-T</span> - PD-1 knockout, enhanced targeting</li>
+                        <li><span class="highlight">Light-Controlled Activation</span> - Spatial control of CAR-T function</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Accessible Organs</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Liver</span> - Wilson's disease, hemophilia gene therapy</li>
+                        <li><span class="highlight">Muscle</span> - Duchenne MD, metabolic myopathies</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Quadrant 3: X-ray-Drug -->
+            <div class="quadrant q3">
+                <div class="quadrant-header">
+                    <div class="quadrant-number">03</div>
+                    <div class="quadrant-title">X-ray Activated<br>Drug Delivery</div>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Deep Tissue Cancers</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Chemotherapy Drugs</span> - Doxorubicin, paclitaxel, gemcitabine</li>
+                        <li><span class="highlight">Targeted Therapeutics</span> - Pazopanib, kinase inhibitors</li>
+                        <li><span class="highlight">Radiosensitizers</span> - Cisplatin, 5-fluorouracil</li>
+                        <li><span class="highlight">Hypoxia-Activated Prodrugs</span> - Tirapazamine, mitomycin C</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Brain Tumors</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">BBB-Crossing Chemotherapy</span> - Temozolomide, carmustine</li>
+                        <li><span class="highlight">Glioblastoma Drugs</span> - Targeted small molecules</li>
+                        <li><span class="highlight">Pediatric Brain Tumors</span> - Reduced systemic toxicity</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Abdominal Cancers</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Pancreatic Cancer</span> - Gemcitabine, FOLFIRINOX</li>
+                        <li><span class="highlight">Liver Tumors</span> - Sorafenib, regorafenib</li>
+                        <li><span class="highlight">Gastric Cancer</span> - Trastuzumab, pembrolizumab</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Advanced Applications</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Theranostics</span> - Combined imaging and drug release</li>
+                        <li><span class="highlight">Combination Therapy</span> - Radio-chemo-sensitization</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Quadrant 4: X-ray-Gene -->
+            <div class="quadrant q4">
+                <div class="quadrant-header">
+                    <div class="quadrant-number">04</div>
+                    <div class="quadrant-title">X-ray Activated<br>Gene Therapy</div>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Brain Tumors</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Glioblastoma</span> - p53 restoration, CRISPR targeting EGFR</li>
+                        <li><span class="highlight">Medulloepithelioma</span> - Tumor suppressor gene delivery</li>
+                        <li><span class="highlight">Metastatic Brain Lesions</span> - Apoptosis-inducing genes</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Enhanced CAR-T for Solid Tumors</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Solid Tumor CAR-T</span> - X-ray controlled spatial activation</li>
+                        <li><span class="highlight">Universal CAR-T</span> - CRISPR-edited allogeneic cells</li>
+                        <li><span class="highlight">Cytokine Control</span> - Localized IL-2, interferon production</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Deep Tissue Gene Editing</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Pancreatic Cancer</span> - KRAS targeting, p16 restoration</li>
+                        <li><span class="highlight">Liver Metastases</span> - Tumor suppressor gene delivery</li>
+                        <li><span class="highlight">Lung Tumors</span> - p53 restoration, oncogene silencing</li>
+                    </ul>
+                </div>
+                
+                <div class="application-category">
+                    <div class="category-title">Neurodegenerative Diseases</div>
+                    <ul class="applications-list">
+                        <li><span class="highlight">Parkinson's Disease</span> - GDNF, dopamine synthesis genes</li>
+                        <li><span class="highlight">ALS</span> - SOD1 silencing, neuroprotective genes</li>
+                        <li><span class="highlight">Huntington's</span> - Huntingtin gene silencing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
